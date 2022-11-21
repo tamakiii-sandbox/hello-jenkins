@@ -1,8 +1,11 @@
 .PHONY: help setup install
 
 VERSION := 2.60.3
+VERSION_TINI := 0.14.0
+
 URL_DOWNLOAD := https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/$(VERSION)/jenkins-war-$(VERSION).war
 CHECKSUM := 2d71b8f87c8417f9303a73d52901a59678ee6c0eefcf7325efed6035ff39372a
+CHECKSUM_TINI := 6c41ec7d33e857d4779f14d9c74924cab0c7973485d2972419a3b7c7620ff5fd
 
 USER := jenkins
 GROUP := jenkins
@@ -15,6 +18,10 @@ help:
 	@cat $(firstword $(MAKEFILE_LIST))
 
 setup: \
+	/usr/bin/git \
+	/usr/bin/make \
+	/usr/bin/which \
+	/usr/bin/sudo \
 	/usr/local/etc/group/jenkins \
 	/usr/local/etc/user/jenkins
 
@@ -33,10 +40,8 @@ setup: \
 	mkdir $@
 
 install: \
-	/usr/bin/git \
-	/usr/bin/make \
-	/usr/bin/which \
 	/usr/bin/java \
+	/usr/bin/tini \
 	/usr/share/jenkins/jenkins.war
 
 /usr/bin/make:
@@ -44,6 +49,9 @@ install: \
 
 /usr/bin/which:
 	dnf install -y which
+
+/usr/bin/sudo:
+	dnf install -y sudo
 
 /usr/bin/java:
 	dnf install -y java-17-amazon-corretto
@@ -55,6 +63,11 @@ install: \
 	curl -fsSL $(URL_DOWNLOAD) -o $@
 	echo "$(CHECKSUM) $@" | sha256sum -c -
 
+/usr/bin/tini:
+	curl -fsSL https://github.com/krallin/tini/releases/download/v$(VERSION_TINI)/tini-static-amd64 -o $@
+	chmod +x $@
+	echo "$(CHECKSUM_TINI) $@" | sha256sum -c -
+
 /usr/share/jenkins:
 	mkdir $@
 
@@ -63,7 +76,8 @@ install: \
 
 clean:
 	rm -rf /usr/share/jenkins
-	-groupdel jenkins
-	rm -rf /usr/local/etc/group/jenkins
+	rm -rf /usr/bin/tini
 	-userdel jenkins
 	rm -rf /usr/local/etc/user/jenkins
+	-groupdel jenkins
+	rm -rf /usr/local/etc/group/jenkins

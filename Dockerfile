@@ -11,7 +11,7 @@ ARG USER
 
 COPY docker/Makefile /tmp/Makefile
 
-RUN make -C /tmp install && \
+RUN make -C /tmp setup install && \
     dnf clean all && \
     rm -rf /var/cache/dnf && \
     rm -rf /tmp/Makefile
@@ -31,7 +31,7 @@ RUN make -C /tmp install && \
 
 VOLUME /var/jenkins_home
 
-USER $USER
+# USER jenkins
 
 # COPY jenkins-support /usr/local/bin/jenkins-support
 # COPY jenkins.sh /usr/local/bin/jenkins.sh
@@ -41,3 +41,7 @@ USER $USER
 # COPY plugins.sh /usr/local/bin/plugins.sh
 # COPY install-plugins.sh /usr/local/bin/install-plugins.sh
 # Fo
+
+COPY docker/jenkins.sh /usr/local/bin/jenkins.sh
+
+# ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/jenkins.sh"]
