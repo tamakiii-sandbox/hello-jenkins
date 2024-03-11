@@ -1,9 +1,0 @@
-#!/bin/bash
-
-RESULT=$(cat /etc/group | grep $1)
-
-if [ -z "$RESULT" ]; then
-  exit 1
-fi
-
-echo $RESULT
